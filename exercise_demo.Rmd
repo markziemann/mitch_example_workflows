@@ -18,7 +18,7 @@ In this analysis I will perform a multivariate analysis of REACTOME pathway enri
 ```{r,genesets}
 library(mitch)
 download.file("https://reactome.org/download/current/ReactomePathways.gmt.zip", destfile="ReactomePathways.gmt.zip")
-unzip("ReactomePathways.gmt.zip")
+unzip("ReactomePathways.gmt.zip",overwrite = TRUE)
 genesets <- gmt_import("ReactomePathways.gmt")
 head(genesets,3)
 ```
@@ -41,6 +41,22 @@ colnames(genenames) <- c("GeneID","GeneName")
 head(genenames)
 
 x <- list("rna"=rna,"k9a"=k9a,"k36a"=k36a)
-xx <- mitch_import(x,DEtype = "edger", geneTable = genenames)
+xx <- mitch_import(x = x,DEtype = "edger", geneTable = genenames)
 
+head(xx)
+```
+
+## Perform enrichment analysis
+
+```{r,enrichment}
+res <- mitch_calc(x = xx,genesets = genesets,priority = "effect")
+head(res$enrichment_result)
+
+mitch_report(res = res, outfile = "exercise.html")
+```
+
+## Session Information
+
+```{r,sessioninfo}
+sessionInfo()
 ```
