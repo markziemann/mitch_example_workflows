@@ -5,6 +5,8 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+Source: https://github.com/markziemann/mitch_live_demo
+
 # Introduction
 
 Six male participants underwent 1 hr endurance exercise (~70% VO2 peak) with skeletal muscle biopsy before and immediately after exercise.
@@ -17,9 +19,13 @@ In this analysis I will perform a multivariate analysis of REACTOME pathway enri
 
 ```{r,genesets}
 library(mitch)
+
 download.file("https://reactome.org/download/current/ReactomePathways.gmt.zip", destfile="ReactomePathways.gmt.zip")
+
 unzip("ReactomePathways.gmt.zip",overwrite = TRUE)
+
 genesets <- gmt_import("ReactomePathways.gmt")
+
 head(genesets,3)
 ```
 
@@ -35,7 +41,10 @@ head(k9a)
 k36a <- read.table("data/K36ac.tsv",header=TRUE,row.names = 1)
 head(k36a)
 
-genenames <- as.data.frame(unique(c(rownames(rna),rownames(k9a),rownames(k36a))),stringsAsFactors = FALSE)
+# create a gene name mapping table
+genenames <- as.data.frame(unique(c(rownames(rna),rownames(k9a),rownames(k36a))),
+                           stringsAsFactors = FALSE)
+
 genenames$genesymbol <- sapply(strsplit(genenames[,1],"_"),"[[",2)
 colnames(genenames) <- c("GeneID","GeneName")
 head(genenames)
