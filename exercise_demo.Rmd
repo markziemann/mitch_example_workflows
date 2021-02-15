@@ -29,9 +29,35 @@ genesets <- gmt_import("ReactomePathways.gmt")
 head(genesets,3)
 ```
 
+## MDS
+
+```{r,mds,fig.width=6,fig.height=6}
+
+rna <- read.table("mds/rna.tsv",header=TRUE,row.names = 1)
+head(rna)
+
+k9a <- read.table("mds/k9a.tsv",header=TRUE,row.names = 1)
+head(k9a)
+
+k36a <- read.table("mds/k36a.tsv",header=TRUE,row.names = 1)
+head(k36a)
+
+COLS <- c(rep("lightblue",6),rep("pink",6))
+plot(cmdscale(dist(t(rna))), xlab="Coordinate 1", ylab="Coordinate 2", pch=19,cex=2,col=COLS)
+text(cmdscale(dist(t(rna))), labels=colnames(rna)) 
+
+plot(cmdscale(dist(t(k9a))), xlab="Coordinate 1", ylab="Coordinate 2", pch=19,cex=2,col=COLS)
+text(cmdscale(dist(t(k9a))), labels=colnames(k9a),cex=0.5) 
+
+plot(cmdscale(dist(t(k36a))), xlab="Coordinate 1", ylab="Coordinate 2", pch=19,cex=2,col=COLS)
+text(cmdscale(dist(t(k36a))), labels=colnames(k36a)) 
+
+```
+
+
 ## Import profiling data
 
-```{r,import}
+```{r,import,fig.height=8,fig.width=8}
 rna <- read.table("data/RNA.tsv",header=TRUE,row.names = 1)
 head(rna)
 
@@ -53,14 +79,42 @@ x <- list("rna"=rna,"k9a"=k9a,"k36a"=k36a)
 xx <- mitch_import(x = x,DEtype = "edger", geneTable = genenames)
 
 head(xx)
+dim(xx)
 ```
+
+
+## MAplots
+
+```{r,maplots,fig.height=6,fig.width=7}
+
+maplot <- function(x) {
+  sig <- subset(x,adj.p.value<0.05)
+  NSIG = nrow(sig)
+  UP = nrow(subset(sig,logFC>0))
+  DN = nrow(subset(sig,logFC<0))
+  HEADER=paste(NSIG,"DEGs,",UP,"upregulated,",DN,"downregulated")
+  plot(x$logFC,-log10(x$PValue),pch=19,col="gray",main=HEADER,xlab="logFC",ylab="-log10(p)")
+  points(sig$logFC,-log10(sig$PValue),pch=19,col="red")
+  top <- head(sig,10)
+  LABELS <- sapply(strsplit(rownames(top),"_"),"[[",2)
+  text(top$logFC,-log10(top$PValue)+1,labels = LABELS)
+}
+  
+maplot(rna)
+maplot(k9a)
+maplot(k36a)
+
+```
+
+
 
 ## Perform enrichment analysis
 
 ```{r,enrichment}
-res <- mitch_calc(x = xx,genesets = genesets,priority = "effect")
-head(res$enrichment_result)
+res <- mitch_calc(x = xx,genesets = genesets,priority = "effect",resrows = 50)
+head(res$enrichment_result,30)
 
+unlink("exercise.html")
 mitch_report(res = res, outfile = "exercise.html")
 ```
 
